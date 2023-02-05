@@ -7,6 +7,7 @@ from selenium.webdriver.common.by import By
 from configparser import ConfigParser
 import pprint
 import re
+import csv
 
 config = config = ConfigParser()
 config.read('config.ini')
@@ -32,12 +33,19 @@ def get_bill_data(driver):
     if data_type.startswith('Stripe振込手数料（税込）'):
       bikou = "Stripe振込手数料（税込）"
       stripe_tesuryo = item.find_element(By.XPATH,'div/div/div[4]/h2').get_attribute('innerHTML') 
+    elif data_type.startswith('複数カテゴリの追加分（税抜）'):
+      id = ""
+      bikou = "複数カテゴリの追加分（税抜）"
+      tesuryo = ""
+      kaikei_kingaku = item.find_element(By.XPATH,'div[2]/div/div/div/div[2]').get_attribute('innerHTML')
     elif data_type.startswith('店舗の当日キャンセル'):
       id = re.search('.*? :(.*?)（税抜）',data_type)[1]
       bikou = "店舗の当日キャンセル"
       tesuryo = item.find_element(By.XPATH,'div/div/div[4]/h2').get_attribute('innerHTML')
       kaikei_kingaku = item.find_element(By.XPATH,'div[2]/div/div/div/div[2]').get_attribute('innerHTML')
     else:
+      if data_type.startswith('リピーターからの受注（税抜）'):
+        bikou = 'リピーターからの受注（税抜）'
       id = item.find_element(By.XPATH,'div/div/div[2]/a').get_attribute('innerHTML')
       kaikei_kingaku = item.find_element(By.XPATH,'div/div/div/div/div[2]').get_attribute('innerHTML') 
       tesuryo = item.find_element(By.XPATH,'div/div/div[4]/h2').get_attribute('innerHTML') 
@@ -93,7 +101,10 @@ for opt in url_list:
   #for item in items:
   #  print(item.get_attribute('innerHTML'))
   #pprint.pprint(get_bill_data(driver))
-  break
+f = open('output.tsv', 'w')
+writer = csv.writer(f, delimiter='\t')
+writer.writerows(result)
+f.close()
 pprint.pprint(result)
 # 5秒間待機してみる。
 #sleep(5)
