@@ -1,7 +1,6 @@
 # coding:utf-8
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
-from time import sleep
 from selenium.webdriver.chrome import service as fs
 from selenium.webdriver.common.by import By
 from configparser import ConfigParser
@@ -49,7 +48,7 @@ def get_bill_data(driver):
       id = item.find_element(By.XPATH,'div/div/div[2]/a').get_attribute('innerHTML')
       kaikei_kingaku = item.find_element(By.XPATH,'div/div/div/div/div[2]').get_attribute('innerHTML') 
       tesuryo = item.find_element(By.XPATH,'div/div/div[4]/h2').get_attribute('innerHTML') 
-    result.append([kubun,date,kaikei_kingaku,tesuryo,stripe_tesuryo,bikou])
+    result.append([kubun,date,id,kaikei_kingaku,tesuryo,stripe_tesuryo,bikou])
 
   return result
   
@@ -64,7 +63,7 @@ def get_bill_id(lines):
       result.append(match[1])
   return result
  
-
+# ここから開始
 # ブラウザを開く
 chrome_service = fs.Service(executable_path='/usr/local/bin/chromedriver')
 driver = webdriver.Chrome(service=chrome_service)
@@ -81,7 +80,7 @@ login_button.click()
 bill_dropdown = driver.find_elements(By.XPATH,'//*[@id="npBill"]')
 #各月のURLを取得する
 url_list = get_bill_id(bill_dropdown[0].get_attribute('innerHTML'))
-result = []
+result: list = [["区分","日付","id","会計金額","手数料","Stripe手数料","備考"]]
 for opt in url_list:
   print(opt)
   month = re.search('bill_id=.*?month=([0-9]{4}-[0-9]{2})',opt)
@@ -97,16 +96,9 @@ for opt in url_list:
       data = list(line)
       data.insert(0,bill_month) 
       result.append(data)
-  #items=driver.find_elements(By.XPATH,'//*[@id="nplist"]/div[2]/ul/li')
-  #for item in items:
-  #  print(item.get_attribute('innerHTML'))
-  #pprint.pprint(get_bill_data(driver))
 f = open('output.tsv', 'w')
 writer = csv.writer(f, delimiter='\t')
 writer.writerows(result)
 f.close()
 pprint.pprint(result)
-# 5秒間待機してみる。
-#sleep(5)
-# ブラウザを終了する。
 driver.close()
