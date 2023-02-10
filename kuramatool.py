@@ -14,16 +14,15 @@ config.read('config.ini')
 user_id=config.get("user", 'user_id')
 user_pass=config.get("user", 'user_pass')
 
-def get_bill_data(driver):
+def get_bill_data(driver,kubun):
   result: list = []
 #  item=driver.find_element(By.XPATH,'//*[@id="nplist"]/div[2]/ul/li[1]')
-  items=driver.find_elements(By.XPATH,'//*[@id="nplist"]/div[2]/ul/li')
+  items=driver.find_elements(By.XPATH,'//*[@id="'+kubun+'"]/div[2]/ul/li')
   i = 0
   for item in items:
     date = item.find_element(By.XPATH,'div/div/div[1]/span').get_attribute('innerHTML')
     data_type = item.find_element(By.XPATH,'div/div/div[3]').get_attribute('innerHTML') 
     id = ""
-    kubun = 'nplist' 
     stripe_tesuryo=""
     kaikei_kingaku=""
     tesuryo=""
@@ -90,7 +89,13 @@ for opt in url_list:
     bill_month = "-"
 
   driver.get("https://curama.jp/shop/bill/?"+opt)
-  month_data = get_bill_data(driver)
+  month_data = get_bill_data(driver,"nplist")
+  for line in month_data:
+    if line is not None:
+      data = list(line)
+      data.insert(0,bill_month) 
+      result.append(data)
+  month_data = get_bill_data(driver,"stripelist")
   for line in month_data:
     if line is not None:
       data = list(line)
@@ -100,5 +105,9 @@ f = open('output.tsv', 'w')
 writer = csv.writer(f, delimiter='\t')
 writer.writerows(result)
 f.close()
+
+
+
+
 pprint.pprint(result)
 driver.close()
