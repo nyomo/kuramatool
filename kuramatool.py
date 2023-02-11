@@ -64,9 +64,9 @@ def get_bill_id(lines):
   result = []
   for line in lines_array:
     #match = re.search('value="\/shop\/bill\/\?(bill_id=.*&amp;month=[0-9]{4}-[0-9]{2})" \>.*',line)
-    match = re.search('value="/shop/bill/\?(bill_id=.*?&amp;month=[0-9]{4}-[0-9]{2})',line)
+    match = re.search('value="/shop/bill/\?bill_id=(.*)?&amp;month=([0-9]{4}-[0-9]{2})',line)
     if match is not None:
-      result.append(match[1])
+      result.append('bill_id='+match[1]+'&month='+match[2])
   return result
  
 # ここから開始
