@@ -45,10 +45,17 @@ def get_bill_data(driver,kubun):
       if data_type.startswith('リピーターからの受注（税抜）'):
         bikou = 'リピーターからの受注（税抜）'
       id = item.find_element(By.XPATH,'div/div/div[2]/a').get_attribute('innerHTML')
-      kaikei_kingaku = item.find_element(By.XPATH,'div/div/div/div/div[2]').get_attribute('innerHTML') 
-      tesuryo = item.find_element(By.XPATH,'div/div/div[4]/h2').get_attribute('innerHTML') 
+      if kubun == 'stripelist':
+        kaikei_kingaku = item.find_element(By.XPATH,'div[2]/div/div/div/div[2]').get_attribute('innerHTML') 
+        tesuryo = item.find_element(By.XPATH,'div[2]/div/div/div/div[6]').get_attribute('innerHTML') 
+        stripe_tesuryo = item.find_element(By.XPATH,'div[2]/div/div/div/div[8]').get_attribute('innerHTML') 
+      else:
+        kaikei_kingaku = item.find_element(By.XPATH,'div/div/div/div/div[2]').get_attribute('innerHTML') 
+        tesuryo = item.find_element(By.XPATH,'div/div/div[4]/h2').get_attribute('innerHTML') 
+    kaikei_kingaku = kaikei_kingaku.replace(',','').replace('円','')
+    tesuryo = tesuryo.replace(',','').replace('円','')
+    stripe_tesuryo = stripe_tesuryo.replace(',','').replace('円','')
     result.append([kubun,date,id,kaikei_kingaku,tesuryo,stripe_tesuryo,bikou])
-
   return result
   
 # できあがってる部分
