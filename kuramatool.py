@@ -46,7 +46,7 @@ def get_bill_data(driver,kubun):
         bikou = 'リピーターからの受注（税抜）'
       id = item.find_element(By.XPATH,'div/div/div[2]/a').get_attribute('innerHTML')
       if kubun == 'stripelist':
-        kaikei_kingaku = item.find_element(By.XPATH,'div[2]/div/div/div/div[2]').get_attribute('innerHTML') 
+        kaikei_kingaku = item.find_element(By.XPATH,'div[2]/div/div/div/div[4]').get_attribute('innerHTML') 
         tesuryo = item.find_element(By.XPATH,'div[2]/div/div/div/div[6]').get_attribute('innerHTML') 
         stripe_tesuryo = item.find_element(By.XPATH,'div[2]/div/div/div/div[8]').get_attribute('innerHTML') 
       else:
@@ -86,7 +86,7 @@ login_button.click()
 bill_dropdown = driver.find_elements(By.XPATH,'//*[@id="npBill"]')
 #各月のURLを取得する
 url_list = get_bill_id(bill_dropdown[0].get_attribute('innerHTML'))
-result: list = [["区分","日付","id","会計金額","手数料","Stripe手数料","備考"]]
+result: list = [["請求月","区分","日付","id","会計金額","手数料","Stripe手数料","備考"]]
 for opt in url_list:
   print(opt)
   month = re.search('bill_id=.*?month=([0-9]{4}-[0-9]{2})',opt)
