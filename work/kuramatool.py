@@ -112,7 +112,7 @@ for opt in url_list:
       data = list(line)
       data.insert(0,bill_month) 
       result.append(data)
-f = open('output.tsv', 'w')
+f = open('output.tsv', 'w',newline='',encoding='utf-8')
 writer = csv.writer(f, delimiter='\t')
 writer.writerows(result)
 f.close()
