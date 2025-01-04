@@ -7,6 +7,7 @@ from configparser import ConfigParser
 from pprint import pprint
 import re
 import csv
+import chromedriver_binary
 
 config = config = ConfigParser()
 config.read('config.ini')
@@ -71,8 +72,9 @@ def get_bill_id(lines):
  
 # ここから開始
 # ブラウザを開く
-chrome_service = fs.Service(executable_path='/usr/local/bin/chromedriver')
-driver = webdriver.Chrome(service=chrome_service)
+#chrome_service = fs.Service(executable_path='/usr/local/bin/chromedriver')
+#chrome_service = fs.Service()
+driver = webdriver.Chrome()
 #ログインする
 driver.get("https://curama.jp/shop/bill/")
 login_form_id = driver.find_element(By.XPATH,'//*[@id="shopUser"]/div[1]/div/div/div[1]/form/div[1]/table/tbody/tr[1]/td/input')
