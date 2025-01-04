@@ -4,9 +4,10 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome import service as fs
 from selenium.webdriver.common.by import By
 from configparser import ConfigParser
-import pprint
+from pprint import pprint
 import re
 import csv
+import chromedriver_binary
 
 config = config = ConfigParser()
 config.read('config.ini')
@@ -44,11 +45,13 @@ def get_bill_data(driver,kubun):
     else:
       if data_type.startswith('リピーターからの受注（税抜）'):
         bikou = 'リピーターからの受注（税抜）'
-      id = item.find_element(By.XPATH,'div/div/div[2]/a').get_attribute('innerHTML')
+        id = item.find_element(By.XPATH,'div/div/div[2]/a').get_attribute('innerHTML')
       if kubun == 'stripelist':
         kaikei_kingaku = item.find_element(By.XPATH,'div[2]/div/div/div/div[4]').get_attribute('innerHTML') 
         tesuryo = item.find_element(By.XPATH,'div[2]/div/div/div/div[6]').get_attribute('innerHTML') 
         stripe_tesuryo = item.find_element(By.XPATH,'div[2]/div/div/div/div[8]').get_attribute('innerHTML') 
+      if data_type.startswith('くらしのマーケット内広告枠掲載料金（税込）'):
+        bikou = '暮らしのマーケット内広告掲載料金（税込）'
       else:
         kaikei_kingaku = item.find_element(By.XPATH,'div/div/div/div/div[2]').get_attribute('innerHTML') 
         tesuryo = item.find_element(By.XPATH,'div/div/div[4]/h2').get_attribute('innerHTML') 
@@ -71,8 +74,9 @@ def get_bill_id(lines):
  
 # ここから開始
 # ブラウザを開く
-chrome_service = fs.Service(executable_path='/usr/local/bin/chromedriver')
-driver = webdriver.Chrome(service=chrome_service)
+#chrome_service = fs.Service(executable_path='/usr/local/bin/chromedriver')
+#chrome_service = fs.Service()
+driver = webdriver.Chrome()
 #ログインする
 driver.get("https://curama.jp/shop/bill/")
 login_form_id = driver.find_element(By.XPATH,'//*[@id="shopUser"]/div[1]/div/div/div[1]/form/div[1]/table/tbody/tr[1]/td/input')
@@ -108,7 +112,7 @@ for opt in url_list:
       data = list(line)
       data.insert(0,bill_month) 
       result.append(data)
-f = open('output.tsv', 'w')
+f = open('output.tsv', 'w',newline='',encoding='utf-8')
 writer = csv.writer(f, delimiter='\t')
 writer.writerows(result)
 f.close()
