@@ -45,11 +45,13 @@ def get_bill_data(driver,kubun):
     else:
       if data_type.startswith('リピーターからの受注（税抜）'):
         bikou = 'リピーターからの受注（税抜）'
-      id = item.find_element(By.XPATH,'div/div/div[2]/a').get_attribute('innerHTML')
+        id = item.find_element(By.XPATH,'div/div/div[2]/a').get_attribute('innerHTML')
       if kubun == 'stripelist':
         kaikei_kingaku = item.find_element(By.XPATH,'div[2]/div/div/div/div[4]').get_attribute('innerHTML') 
         tesuryo = item.find_element(By.XPATH,'div[2]/div/div/div/div[6]').get_attribute('innerHTML') 
         stripe_tesuryo = item.find_element(By.XPATH,'div[2]/div/div/div/div[8]').get_attribute('innerHTML') 
+      if data_type.startswith('くらしのマーケット内広告枠掲載料金（税込）'):
+        bikou = '暮らしのマーケット内広告掲載料金（税込）'
       else:
         kaikei_kingaku = item.find_element(By.XPATH,'div/div/div/div/div[2]').get_attribute('innerHTML') 
         tesuryo = item.find_element(By.XPATH,'div/div/div[4]/h2').get_attribute('innerHTML') 
