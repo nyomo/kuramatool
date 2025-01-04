@@ -4,7 +4,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome import service as fs
 from selenium.webdriver.common.by import By
 from configparser import ConfigParser
-import pprint
+from pprint import pprint
 import re
 import csv
 
