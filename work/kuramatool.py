@@ -61,7 +61,8 @@ def get_bill_data(driver,kubun):
     result.append([kubun,date,id,kaikei_kingaku,tesuryo,stripe_tesuryo,bikou])
   return result
   
-# できあがってる部分
+# ドロップダウンリストから各月のbill_idを取得する
+# 当月分のみ別パターン
 def get_bill_id(lines):
   lines_array=lines.split("\n")
   result = []
@@ -92,12 +93,14 @@ bill_dropdown = driver.find_elements(By.XPATH,'//*[@id="npBill"]')
 #各月のURLを取得する
 url_list = get_bill_id(bill_dropdown[0].get_attribute('innerHTML'))
 result: list = [["請求月","区分","日付","id","会計金額","手数料","Stripe手数料","備考"]]
+
 for opt in url_list:
   print(':'+opt)
   month = re.search('bill_id=.*?month=([0-9]{4}-[0-9]{2})',opt)
   if month is not None:
     bill_month = month[1]
   else:
+    #bill_monthに当月の文字列を入れる
     bill_month = "-"
 
   driver.get("https://curama.jp/shop/bill/?"+opt)
@@ -117,9 +120,5 @@ f = open('output.tsv', 'w',newline='',encoding='utf-8')
 writer = csv.writer(f, delimiter='\t')
 writer.writerows(result)
 f.close()
-
-
-
-
 pprint.pprint(result)
 driver.close()
