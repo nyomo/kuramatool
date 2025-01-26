@@ -16,7 +16,8 @@ config.read('config.ini')
 user_id=config.get("user", 'user_id')
 user_pass=config.get("user", 'user_pass')
 
-def get_bill_data(driver,kubun):
+
+def get_bill_data(driver,kubun,bill_month):
   result: list = []
 #  item=driver.find_element(By.XPATH,'//*[@id="nplist"]/div[2]/ul/li[1]')
   items=driver.find_elements(By.XPATH,'//*[@id="'+kubun+'"]/div[2]/ul/li')
@@ -137,5 +138,5 @@ f = open('output.tsv', 'w',newline='',encoding='utf-8')
 writer = csv.writer(f, delimiter='\t')
 writer.writerows(result)
 f.close()
-pprint.pprint(result)
+#pprint.pprint(result)
 driver.close()
