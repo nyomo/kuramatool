@@ -23,7 +23,6 @@ def get_bill_data(driver,kubun,bill_month):
   items=driver.find_elements(By.XPATH,'//*[@id="'+kubun+'"]/div[2]/ul/li')
   i = 0
   for item in items:
-    date = item.find_element(By.XPATH,'div/div/div[1]/span').get_attribute('innerHTML')
     data_type = item.find_element(By.XPATH,'div/div/div[3]').get_attribute('innerHTML') 
     id = ""
     stripe_tesuryo=""
@@ -48,16 +47,16 @@ def get_bill_data(driver,kubun,bill_month):
       if data_type.startswith('リピーターからの受注（税抜）'):
         bikou = 'リピーターからの受注（税抜）'
         id = item.find_element(By.XPATH,'div/div/div[2]/a').get_attribute('innerHTML')
-      if kubun == 'stripelist':
+      elif kubun == 'stripelist':
         kaikei_kingaku = item.find_element(By.XPATH,'div[2]/div/div/div/div[4]').get_attribute('innerHTML') 
-        tesuryo = item.find_element(By.XPATH,'div[2]/div/div/div/div[6]').get_attribute('innerHTML') 
+        tesuryo        = item.find_element(By.XPATH,'div[2]/div/div/div/div[6]').get_attribute('innerHTML') 
         stripe_tesuryo = item.find_element(By.XPATH,'div[2]/div/div/div/div[8]').get_attribute('innerHTML') 
-      if data_type.startswith('くらしのマーケット内広告枠掲載料金（税込）'):
+      elif data_type.startswith('くらしのマーケット内広告枠掲載料金（税込）'):
         bikou = '暮らしのマーケット内広告掲載料金（税込）'
       else:
         kaikei_kingaku = item.find_element(By.XPATH,'div/div/div/div/div[2]').get_attribute('innerHTML') 
         tesuryo = item.find_element(By.XPATH,'div/div/div[4]/h2').get_attribute('innerHTML') 
-    kaikei_kingaku = kaikei_kingaku.replace(',','').replace('円','')
+    kaikei_kingaku = kaikei_kingaku.strip()
     tesuryo = tesuryo.replace(',','').replace('円','')
     stripe_tesuryo = stripe_tesuryo.replace(',','').replace('円','')
     #取得した日付に年を入れる
