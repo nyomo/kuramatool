@@ -65,6 +65,7 @@ def get_bill_data(driver,kubun):
 def get_bill_id(lines):
   lines_array=lines.split("\n")
   result = []
+  result.append('')
   for line in lines_array:
     #match = re.search('value="\/shop\/bill\/\?(bill_id=.*&amp;month=[0-9]{4}-[0-9]{2})" \>.*',line)
     match = re.search('value="/shop/bill/\?bill_id=(.*)?&amp;month=([0-9]{4}-[0-9]{2})',line)
@@ -92,7 +93,7 @@ bill_dropdown = driver.find_elements(By.XPATH,'//*[@id="npBill"]')
 url_list = get_bill_id(bill_dropdown[0].get_attribute('innerHTML'))
 result: list = [["請求月","区分","日付","id","会計金額","手数料","Stripe手数料","備考"]]
 for opt in url_list:
-  print(opt)
+  print(':'+opt)
   month = re.search('bill_id=.*?month=([0-9]{4}-[0-9]{2})',opt)
   if month is not None:
     bill_month = month[1]
