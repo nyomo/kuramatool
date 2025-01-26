@@ -5,6 +5,7 @@ from selenium.webdriver.chrome import service as fs
 from selenium.webdriver.common.by import By
 from configparser import ConfigParser
 from pprint import pprint
+import datetime
 import re
 import csv
 import chromedriver_binary
@@ -58,6 +59,19 @@ def get_bill_data(driver,kubun):
     kaikei_kingaku = kaikei_kingaku.replace(',','').replace('円','')
     tesuryo = tesuryo.replace(',','').replace('円','')
     stripe_tesuryo = stripe_tesuryo.replace(',','').replace('円','')
+    #取得した日付に年を入れる
+    date_str = item.find_element(By.XPATH,'div/div/div[1]/span').get_attribute('innerHTML')
+    if kubun == 'stripelist':
+      year = re.search('([0-9]{4})-[0123][0-9]',bill_month)[1]
+      date = year + "年" + date_str
+    else:
+      date_temp = re.search('([0-9]{4})-([0123][0-9])',bill_month)
+      year = date_temp[1]
+      month = date_temp[2]
+      if month == "01":
+        year = int(year) - 1
+      date = str(year) + "年" + date_str
+
     result.append([kubun,date,id,kaikei_kingaku,tesuryo,stripe_tesuryo,bikou])
   return result
   
@@ -101,16 +115,19 @@ for opt in url_list:
     bill_month = month[1]
   else:
     #bill_monthに当月の文字列を入れる
-    bill_month = "-"
+    jst = datetime.timezone(datetime.timedelta(hours=9))
+    dt = datetime.datetime.now(jst)
+    today_month = dt.strftime("%Y-%m")
+    bill_month = today_month
 
   driver.get("https://curama.jp/shop/bill/?"+opt)
-  month_data = get_bill_data(driver,"nplist")
+  month_data = get_bill_data(driver,"nplist",bill_month)
   for line in month_data:
     if line is not None:
       data = list(line)
       data.insert(0,bill_month) 
       result.append(data)
-  month_data = get_bill_data(driver,"stripelist")
+  month_data = get_bill_data(driver,"stripelist",bill_month)
   for line in month_data:
     if line is not None:
       data = list(line)
