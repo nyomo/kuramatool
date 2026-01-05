@@ -43,6 +43,8 @@ def get_bill_data(driver,kubun,bill_month):
       bikou = "店舗の当日キャンセル"
       tesuryo = item.find_element(By.XPATH,'div/div/div[4]/h2').get_attribute('innerHTML')
       kaikei_kingaku = item.find_element(By.XPATH,'div[2]/div/div/div/div[2]').get_attribute('innerHTML')
+    elif data_type.startswith('お客様によるキャンセル料（税込）'):
+      bikou = 'お客様によるキャンセル'
     else:
       if data_type.startswith('リピーターからの受注（税抜）'):
         bikou = 'リピーターからの受注（税抜）'
