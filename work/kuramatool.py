@@ -4,9 +4,11 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome import service as fs
 from selenium.webdriver.common.by import By
 from configparser import ConfigParser
-import pprint
+from pprint import pprint
+import datetime
 import re
 import csv
+import chromedriver_binary
 
 config = config = ConfigParser()
 config.read('config.ini')
@@ -14,13 +16,13 @@ config.read('config.ini')
 user_id=config.get("user", 'user_id')
 user_pass=config.get("user", 'user_pass')
 
-def get_bill_data(driver,kubun):
+
+def get_bill_data(driver,kubun,bill_month):
   result: list = []
 #  item=driver.find_element(By.XPATH,'//*[@id="nplist"]/div[2]/ul/li[1]')
   items=driver.find_elements(By.XPATH,'//*[@id="'+kubun+'"]/div[2]/ul/li')
   i = 0
   for item in items:
-    date = item.find_element(By.XPATH,'div/div/div[1]/span').get_attribute('innerHTML')
     data_type = item.find_element(By.XPATH,'div/div/div[3]').get_attribute('innerHTML') 
     id = ""
     stripe_tesuryo=""
@@ -41,27 +43,46 @@ def get_bill_data(driver,kubun):
       bikou = "店舗の当日キャンセル"
       tesuryo = item.find_element(By.XPATH,'div/div/div[4]/h2').get_attribute('innerHTML')
       kaikei_kingaku = item.find_element(By.XPATH,'div[2]/div/div/div/div[2]').get_attribute('innerHTML')
+    elif data_type.startswith('お客様によるキャンセル料（税込）'):
+      bikou = 'お客様によるキャンセル'
     else:
       if data_type.startswith('リピーターからの受注（税抜）'):
         bikou = 'リピーターからの受注（税抜）'
-      id = item.find_element(By.XPATH,'div/div/div[2]/a').get_attribute('innerHTML')
-      if kubun == 'stripelist':
+        id = item.find_element(By.XPATH,'div/div/div[2]/a').get_attribute('innerHTML')
+      elif kubun == 'stripelist':
         kaikei_kingaku = item.find_element(By.XPATH,'div[2]/div/div/div/div[4]').get_attribute('innerHTML') 
-        tesuryo = item.find_element(By.XPATH,'div[2]/div/div/div/div[6]').get_attribute('innerHTML') 
+        tesuryo        = item.find_element(By.XPATH,'div[2]/div/div/div/div[6]').get_attribute('innerHTML') 
         stripe_tesuryo = item.find_element(By.XPATH,'div[2]/div/div/div/div[8]').get_attribute('innerHTML') 
+      elif data_type.startswith('くらしのマーケット内広告枠掲載料金（税込）'):
+        bikou = '暮らしのマーケット内広告掲載料金（税込）'
       else:
         kaikei_kingaku = item.find_element(By.XPATH,'div/div/div/div/div[2]').get_attribute('innerHTML') 
         tesuryo = item.find_element(By.XPATH,'div/div/div[4]/h2').get_attribute('innerHTML') 
-    kaikei_kingaku = kaikei_kingaku.replace(',','').replace('円','')
+    kaikei_kingaku = kaikei_kingaku.strip()
     tesuryo = tesuryo.replace(',','').replace('円','')
     stripe_tesuryo = stripe_tesuryo.replace(',','').replace('円','')
+    #取得した日付に年を入れる
+    date_str = item.find_element(By.XPATH,'div/div/div[1]/span').get_attribute('innerHTML')
+    if kubun == 'stripelist':
+      year = re.search('([0-9]{4})-[0123][0-9]',bill_month)[1]
+      date = year + "年" + date_str
+    else:
+      date_temp = re.search('([0-9]{4})-([0123][0-9])',bill_month)
+      year = date_temp[1]
+      month = date_temp[2]
+      if month == "01":
+        year = int(year) - 1
+      date = str(year) + "年" + date_str
+
     result.append([kubun,date,id,kaikei_kingaku,tesuryo,stripe_tesuryo,bikou])
   return result
   
-# できあがってる部分
+# ドロップダウンリストから各月のbill_idを取得する
+# 当月分のみ別パターン
 def get_bill_id(lines):
   lines_array=lines.split("\n")
   result = []
+  result.append('')
   for line in lines_array:
     #match = re.search('value="\/shop\/bill\/\?(bill_id=.*&amp;month=[0-9]{4}-[0-9]{2})" \>.*',line)
     match = re.search('value="/shop/bill/\?bill_id=(.*)?&amp;month=([0-9]{4}-[0-9]{2})',line)
@@ -71,8 +92,9 @@ def get_bill_id(lines):
  
 # ここから開始
 # ブラウザを開く
-chrome_service = fs.Service(executable_path='/usr/local/bin/chromedriver')
-driver = webdriver.Chrome(service=chrome_service)
+#chrome_service = fs.Service(executable_path='/usr/local/bin/chromedriver')
+#chrome_service = fs.Service()
+driver = webdriver.Chrome()
 #ログインする
 driver.get("https://curama.jp/shop/bill/")
 login_form_id = driver.find_element(By.XPATH,'//*[@id="shopUser"]/div[1]/div/div/div[1]/form/div[1]/table/tbody/tr[1]/td/input')
@@ -87,34 +109,35 @@ bill_dropdown = driver.find_elements(By.XPATH,'//*[@id="npBill"]')
 #各月のURLを取得する
 url_list = get_bill_id(bill_dropdown[0].get_attribute('innerHTML'))
 result: list = [["請求月","区分","日付","id","会計金額","手数料","Stripe手数料","備考"]]
+
 for opt in url_list:
-  print(opt)
+  print(':'+opt)
   month = re.search('bill_id=.*?month=([0-9]{4}-[0-9]{2})',opt)
   if month is not None:
     bill_month = month[1]
   else:
-    bill_month = "-"
+    #bill_monthに当月の文字列を入れる
+    jst = datetime.timezone(datetime.timedelta(hours=9))
+    dt = datetime.datetime.now(jst)
+    today_month = dt.strftime("%Y-%m")
+    bill_month = today_month
 
   driver.get("https://curama.jp/shop/bill/?"+opt)
-  month_data = get_bill_data(driver,"nplist")
+  month_data = get_bill_data(driver,"nplist",bill_month)
   for line in month_data:
     if line is not None:
       data = list(line)
       data.insert(0,bill_month) 
       result.append(data)
-  month_data = get_bill_data(driver,"stripelist")
+  month_data = get_bill_data(driver,"stripelist",bill_month)
   for line in month_data:
     if line is not None:
       data = list(line)
       data.insert(0,bill_month) 
       result.append(data)
-f = open('output.tsv', 'w')
+f = open('output.tsv', 'w',newline='',encoding='utf-8')
 writer = csv.writer(f, delimiter='\t')
 writer.writerows(result)
 f.close()
-
-
-
-
-pprint.pprint(result)
+#pprint.pprint(result)
 driver.close()
