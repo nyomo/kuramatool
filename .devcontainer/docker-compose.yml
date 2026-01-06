@@ -1,0 +1,15 @@
+services:
+  devcontainer:
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+    volumes:
+      - ..:/workdir
+    tty: true
+  chrome:
+    image: selenium/standalone-chrome:latest
+    container_name: selenium
+    ports:
+      - 4444:4444 # Selenium Server
+      - 7900:7900 # VNC (default password secret)
+    shm_size: '2gb'

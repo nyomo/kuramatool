@@ -1,0 +1,7 @@
+{
+    "name": "Dev Container",
+    "dockerComposeFile": "./docker-compose.yml",
+    "service": "devcontainer",
+    "workspaceFolder": "/workdir",
+    "postCreateCommand": "sudo apt-get install -y --no-install-recommends gh curl ssh" 
+}
