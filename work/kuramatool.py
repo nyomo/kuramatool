@@ -3,6 +3,7 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome import service as fs
 from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
 from configparser import ConfigParser
 from pprint import pprint
 import datetime
@@ -94,7 +95,12 @@ def get_bill_id(lines):
 # ブラウザを開く
 #chrome_service = fs.Service(executable_path='/usr/local/bin/chromedriver')
 #chrome_service = fs.Service()
-driver = webdriver.Chrome()
+chrome_options = Options()
+selenium_url = "http://selenium:4444/wd/hub"
+chrome_options.add_argument("--no-sandbox")
+chrome_options.add_argument("--disable-dev-shm-usage")
+
+driver = webdriver.Remote(command_executor=selenium_url, options=chrome_options)
 #ログインする
 driver.get("https://curama.jp/shop/bill/")
 login_form_id = driver.find_element(By.XPATH,'//*[@id="shopUser"]/div[1]/div/div/div[1]/form/div[1]/table/tbody/tr[1]/td/input')
